@@ -24,6 +24,7 @@ public:
     void accelerate(Point2D acc, double time);
     void move(double time);
     void setPos(double x,double y){loc_.x_ = x; loc_.y_ = y;}
+    void setVel(double x,double y){vel_.x_ = x; vel_.y_ = y;}
 private:
     Point2D loc_;
     Point2D vel_;
@@ -31,7 +32,7 @@ private:
 
 class Bound{
 public:
-    explicit Bound(std::pair<Atom*,Atom*> atom_pair, double k = 10000):atomPair_{std::move(atom_pair)}, k_{k}{}
+    explicit Bound(std::pair<Atom*,Atom*> atom_pair, double k = 1000000):atomPair_{std::move(atom_pair)}, k_{k}{}
     double getBaseDistance() const{return base_distance_;}
     void setBaseDistance(double base_dist){base_distance_ = base_dist;}
     void actByHooke(double dtime);
@@ -44,7 +45,7 @@ private:
 class AtomNet{
 public:
     AtomNet(std::vector<Atom> atoms = std::vector<Atom>{},std::vector<Bound> bounds = std::vector<Bound>{}):atoms_{std::move(atoms)}, bounds_{std::move(bounds)}{}
-    std::vector<Atom> getAtoms() const {return atoms_;};
+    std::vector<Atom> getAtoms() const {return atoms_;}
     void arrangeNet();
     void simNetwork();
     void disturb(int index, Point2D dist);
@@ -53,5 +54,22 @@ private:
     double base_net_distance = 20;
     std::vector<Atom> atoms_;
     std::vector<Bound> bounds_;
+};
+
+class AtomChain{
+public:
+    AtomChain(std::vector<Atom> atoms = std::vector<Atom>{},std::vector<Bound> bounds = std::vector<Bound>{}):atoms_{std::move(atoms)}, bounds_{std::move(bounds)}{}
+    void arrangeChain();
+    std::vector<Atom> getAtoms() const {return atoms_;}
+    void simChain();
+    void disturb(int index, Point2D dist);
+    void setPos(int index, double x, double y){atoms_[index].setPos(x,y);}
+    void setVel(int index, double x, double y){atoms_[index].setVel(x,y);}
+private:
+    double desired_chain_size = 800;
+    double base_chain_distance = 10;
+    std::vector<Atom> atoms_;
+    std::vector<Bound> bounds_;
+
 };
 #endif //SFML_GAME_1_ATOMS_HPP

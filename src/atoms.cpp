@@ -58,7 +58,7 @@ void AtomNet::disturb( int index, Point2D dist) {
 }
 
 void Bound::actByHooke(double dtime) {
-    const double damping = 0.01;
+    const double damping = 0.1;
     double distance = sqrt(pow((atomPair_.first->get_pos().x_-atomPair_.second->get_pos().x_),2) + pow((atomPair_.first->get_pos().y_-atomPair_.second->get_pos().y_),2));
     double base_force = (base_distance_-distance)*k_;
     double sin = (atomPair_.first->get_pos().y_-atomPair_.second->get_pos().y_)/distance;
@@ -78,12 +78,39 @@ void Bound::actByHooke(double dtime) {
 
 void Atom::accelerate(Point2D acc, double time) {
     vel_.y_ += acc.y_ *time;
-    vel_.x_ += acc.x_*time;
-    loc_.x_ += vel_.x_*time;
-    loc_.y_ += vel_.y_*time;
+    vel_.x_ += acc.x_ *time;
 }
 
 void Atom::move(double time) {
-    loc_.x_ += vel_.x_*time;
-    loc_.y_ += vel_.y_*time;
+    loc_.x_ = loc_.x_ + vel_.x_*time;
+    loc_.y_ =loc_.y_ + vel_.y_*time;
+}
+
+void AtomChain::arrangeChain() {
+    double chain_beg = 300;
+    for(int i = 0; i < desired_chain_size/base_chain_distance; i++){
+        Atom new_atom(Point2D{chain_beg + i * base_chain_distance,chain_beg}, Point2D{0,0});
+        atoms_.push_back(new_atom);
+    }
+    for(int i = 0; i < (atoms_.size()-1); i++){
+        Bound new_bound(std::pair<Atom*,Atom*>{&atoms_[i], &atoms_[i+1]});
+        new_bound.setBaseDistance(base_chain_distance);
+        bounds_.push_back(new_bound);
+    }
+}
+
+void AtomChain::simChain() {
+    const double dtime = 0.0001;
+    for(auto bound:bounds_){
+        bound.actByHooke(dtime);
+    }
+    for(auto atom_it =atoms_.begin();atom_it<atoms_.end();atom_it++){
+        atom_it->move(dtime);
+    }
+
+
+}
+void AtomChain::disturb( int index, Point2D dist) {
+    auto cpos = atoms_[index].get_pos();
+    atoms_[index].setPos(cpos.x_+dist.x_,cpos.y_+dist.y_);
 }

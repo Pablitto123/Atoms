@@ -11,9 +11,11 @@ int main() {
     wind.create(sf::VideoMode(1600,900),"My window");
     wind.setFramerateLimit(60);
     AtomNet at;
-    at.arrangeNet();
-    auto atoms = at.getAtoms();
-    at.disturb(0, Point2D{5,5});
+    AtomChain ac;
+    ac.arrangeChain();
+    //at.arrangeNet();
+    auto atoms = ac.getAtoms();
+    //at.disturb(0, Point2D{5,5});
     int counter = 0;
     while(wind.isOpen()) {
         sf::Event event{};
@@ -21,22 +23,26 @@ int main() {
             if (event.type == sf::Event::Closed) {
                 wind.close();
             }
+            if (sf::Mouse::isButtonPressed(sf::Mouse::Left)){
+                ac.setPos(0,sf::Mouse::getPosition(wind).x, sf::Mouse::getPosition(wind).y);
+                ac.setVel(0,0,0);
+            }
         }
         wind.clear(sf::Color::Black);
-        atoms = at.getAtoms();
+        atoms = ac.getAtoms();
         for(auto atom:atoms){
-            sf::CircleShape cr(10);
+            sf::CircleShape cr(3);
             cr.setFillColor(sf::Color::White);
             //std::cout<<"x: " << (float)atom.get_pos().x_<<" y: " <<(float)atom.get_pos().y_<<std::endl;
             cr.setPosition((float)atom.get_pos().x_,(float)atom.get_pos().y_ );
             wind.draw(cr);
         }
-        if(counter ==100){
-            at.disturb(300, Point2D{-5,-5});
+        if(counter == 100){
+            //ac.disturb(0, Point2D{0,-20});
             //at.disturb(random(rng));
         }
         counter+=1;
-        at.simNetwork();
+        ac.simChain();
         wind.display();
     }
 }
